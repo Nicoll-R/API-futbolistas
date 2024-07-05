@@ -1,2 +1,2 @@
 # API-futbolistas
-Se obtienen datos de futbolistas y se muestran en pantalla.
+Desempaquetar proyecto, el archivo principal de ejecución es index.html
