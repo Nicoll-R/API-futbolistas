@@ -14,11 +14,19 @@
             background-color: #302b63;
             color: white;
         }
+        form{
+            color:black
+        }
+        h5{
+            color: black;
+        }
     </style>
 </head>
 <body>
     <div class="container mt-4 shadow-lg p-3 mb-5 bg-body rounded">
+        <!-- Tabla existente -->
         <table class="table table-bordered table-striped">
+            <!-- Encabezados de la tabla -->
             <thead>
                 <tr>
                     <th>ID</th>
@@ -27,12 +35,101 @@
                     <th>Fecha de ingreso</th>
                     <th>Características</th>
                     <th>Posición</th>
+                    <th>Acciones</th> <!-- Nueva columna para acciones -->
                 </tr>
             </thead>
+            <!-- Cuerpo de la tabla -->
             <tbody id="data">
                 <!-- Renderizado de datos -->
             </tbody>
         </table>
+        <script>
+            const openCreateForm = () => {
+            // Abrir la ventana emergente de creación
+                var myModal = new bootstrap.Modal(document.getElementById('createFormModal'), {
+                    keyboard: false
+                });
+                myModal.show();
+            };
+            
+        </script>
+    
+        <!-- Botón para abrir ventana emergente de creación -->
+        <button type="button" class="btn btn-primary mt-3" onClick="openCreateForm()">Crear nuevo futbolista</button>
+
+        <!-- Ventana emergente para crear un nuevo futbolista -->
+        <div class="modal fade" id="createFormModal" tabindex="-1" aria-labelledby="createFormModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createFormModalLabel">Crear nuevo futbolista</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Formulario para crear un nuevo futbolista -->
+                        <div>Form</div>
+                        <form id="createForm">
+                        
+                            <div class="mb-3">
+                                <label for="firstNameInput" class="form-label">Nombre:</label>
+                                <input type="text" class="form-control" id="firstNameInput" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="lastNameInput" class="form-label">Apellido:</label>
+                                <input type="text" class="form-control" id="lastNameInput" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="datedInput" class="form-label">Fecha de ingreso:</label>
+                                <input type="text" class="form-control" id="datedInput" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="charactInput" class="form-label">Características:</label>
+                                <input type="text" class="form-control" id="charactInput" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="positionInput" class="form-label">Posición:</label>
+                                <input type="text" class="form-control" id="positionInput" required />
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onClick="handleCreate()">Crear</button>
+                        <script>
+                          const handleCreate = () => {
+                                // Obtener valores de los campos del formulario en la ventana emergente
+                                const firstName = document.getElementById('firstNameInput').value;
+                                const lastName = document.getElementById('lastNameInput').value;
+                                const dated = document.getElementById('datedInput').value;
+                                const charact = document.getElementById('charactInput').value;
+                                const positionName = document.getElementById('positionInput').value;
+
+                                const newPosition = { name: positionName }; // Crear un nuevo objeto posición
+
+                                // Realizar la solicitud POST
+                                fetch('http://localhost:4000/futbolista', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        firstName: firstName,
+                                        lastName: lastName,
+                                        dated: dated,
+                                        charact: charact,
+                                        position: newPosition,
+                                    }),
+                                })
+                                .then(response => {
+                                    // Recargar la página después de agregar el futbolista
+                                    window.location.reload();
+                                })
+                            };
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js"></script>
@@ -44,11 +141,11 @@
     <script type="text/babel">
         const App = () => {
             const [users, setUsers] = React.useState([]);
-
+    
             React.useEffect(() => {
                 fetchData();
             }, []);
-
+    
             const fetchData = () => {
                 fetch('http://localhost:4000/futbolista')
                     .then(response => response.json())
@@ -57,7 +154,7 @@
                     })
                     .catch(error => console.error('Error fetching data:', error));
             };
-
+    
             const renderUsers = () => {
                 return users.map(user => (
                     <tr key={user.id}>
@@ -67,8 +164,87 @@
                         <td>{user.dated}</td>
                         <td>{user.charact}</td>
                         <td>{user.position ? user.position.name : 'N/A'}</td>
+                        <td>
+                            <button className="btn btn-sm btn-primary" onClick={() => handleEdit(user.id)}>Editar</button>
+                            <button className="btn btn-sm btn-danger ms-2" onClick={() => handleDelete(user.id)}>Eliminar</button>
+                        </td>
                     </tr>
                 ));
+            };
+    
+
+
+
+            const handleEdit = (id) => {
+                fetch(`http://localhost:4000/futbolista/${id}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al obtener los datos del futbolista');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const { id, firstName, lastName, dated, charact, position } = data; // Suponiendo que el endpoint devuelve estos campos
+                        const positionName = position ? position.name : 'N/A';
+                        
+                        // Mostrar los datos en un alert
+                        const message = `Datos del futbolista:
+                        ID: ${id}
+                        Nombre: ${firstName}
+                        Apellido: ${lastName}
+                        Fecha de ingreso: ${dated}
+                        Características: ${charact}
+                        Posición: ${positionName}`;
+
+                        if (window.confirm(message)) {
+                            // Si el usuario confirma los cambios, proceder a actualizar los datos
+                            const updatedFirstName = prompt('Ingrese el nuevo nombre:', firstName) || firstName;
+                            const updatedLastName = prompt('Ingrese el nuevo apellido:', lastName) || lastName;
+                            const updatedDated = prompt('Ingrese la nueva fecha de ingreso:', dated) || dated;
+                            const updatedCharact = prompt('Ingrese las nuevas características:', charact) || charact;
+                            const updatedPosition = prompt('Ingrese la nueva posición:', positionName) || positionName;
+
+                            const newPosition = { name: updatedPosition }; // Objeto de posición actualizado
+
+                            fetch(`http://localhost:4000/futbolista/${id}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    id,
+                                    firstName: updatedFirstName,
+                                    lastName: updatedLastName,
+                                    dated: updatedDated,
+                                    charact: updatedCharact,
+                                    position: newPosition,
+                                }),
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Error al actualizar los datos del futbolista');
+                                }
+                                alert('Datos actualizados correctamente');
+                                fetchData(); // Actualizar la lista después de editar
+                            })
+                            .catch(error => console.error('Error al actualizar los datos del futbolista:', error));
+                        }
+                    })
+                    .catch(error => console.error('Error al obtener los datos del futbolista:', error));
+            };
+
+            const handleDelete = (id) => {
+                fetch(`http://localhost:4000/futbolista/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al eliminar el futbolista');
+                    }
+                    console.log(`Futbolista con ID ${id} eliminado correctamente`);
+                    fetchData(); // Actualizar la lista después de eliminar
+                })
+                .catch(error => console.error('Error al eliminar el futbolista:', error));
             };
 
             return (
