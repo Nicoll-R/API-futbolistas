@@ -1,5 +1,10 @@
 {
   "dependencies": {
-    "cors": "^2.8.5"
+    "axios": "^1.7.2",
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "react-router-dom": "^6.24.1",
+    "sweetalert2": "^11.12.1",
+    "sweetalert2-react-content": "^5.0.7"
   }
 }
