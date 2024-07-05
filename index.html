@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uso de fetch con React</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: cornflowerblue;
+            color: white;
+        }
+        table thead {
+            background-color: #302b63;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 shadow-lg p-3 mb-5 bg-body rounded">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Fecha de ingreso</th>
+                    <th>Características</th>
+                    <th>Posición</th>
+                </tr>
+            </thead>
+            <tbody id="data">
+                <!-- Renderizado de datos -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@6.26.0/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/preset-react@7.14.5/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+    <script type="text/babel">
+        const App = () => {
+            const [users, setUsers] = React.useState([]);
+
+            React.useEffect(() => {
+                fetchData();
+            }, []);
+
+            const fetchData = () => {
+                fetch('http://localhost:4000/futbolista')
+                    .then(response => response.json())
+                    .then(data => {
+                        setUsers(data.content); // Asumiendo que `data` tiene una propiedad `content`
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            };
+
+            const renderUsers = () => {
+                return users.map(user => (
+                    <tr key={user.id}>
+                        <td>{user.id}</td>
+                        <td>{user.firstName}</td>
+                        <td>{user.lastName}</td>
+                        <td>{user.dated}</td>
+                        <td>{user.charact}</td>
+                        <td>{user.position ? user.position.name : 'N/A'}</td>
+                    </tr>
+                ));
+            };
+
+            return (
+                <React.Fragment>
+                    {renderUsers()}
+                </React.Fragment>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('data'));
+    </script>
+</body>
+</html>
